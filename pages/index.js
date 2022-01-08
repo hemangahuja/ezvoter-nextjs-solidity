@@ -118,7 +118,7 @@ export default function Home() {
                 <link rel="icon" href="/favicon.ico" />
             </Head>
             <div>
-              {account ? <h1>{account}</h1> : <h1>{text}</h1>}
+              {account && <h3>{account}</h3> }
             </div>
             <div>
               {text}
