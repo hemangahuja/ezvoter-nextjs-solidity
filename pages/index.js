@@ -12,6 +12,7 @@ export default function Home() {
     const [text, setText] = useState('');
     const [winner, setWinner] = useState('No winner yet');
     const [noOfCandidates, setNoOfCandidates] = useState('');
+    const [candidates, setCandidates] = useState([]);
     const contractAddress = "0x7Fc0C699ab6F90980888DF23045B6EC5c4c681bB";
 
     useEffect(async () => {
@@ -77,6 +78,23 @@ export default function Home() {
     }
    
   }
+  const getCandidates = async () => {
+    setCandidates([]);
+    getNoOfCandidates();
+    if(noOfCandidates === '0'){
+      setText('No candidates yet');
+      return;
+    }
+    try{
+      for(let i=0; i<noOfCandidates; i++){
+        const response = await contract.getCandidate(i);
+        setCandidates(candidates.concat(response.toString()));
+      }
+    }
+    catch(error){
+      setText(longErrorToShortError(error));
+    }
+  }
   const voteForCandidate = async (candidateAddress) => {
     if(!isAddressValid(candidateAddress)){
       setText('Invalid address');
@@ -90,9 +108,17 @@ export default function Home() {
       setText(longErrorToShortError(error));
     }
   }
+  const calculateWinner = async () => {
+    try{
+      const response = await contract.calculateWinner();
+       console.log(response);
+    }
+    catch(error){
+      setText(longErrorToShortError(error));
+    }
+  }
   const getWinner = async () => {
    try{
-    await contract.calculateWinner();
     const response = await contract.getWinner();
     setWinner(response + ' is the winner');
     console.log(response);
@@ -124,12 +150,24 @@ export default function Home() {
               {text}
             </div>
             <input id = "Addcandidate" type = "text"></input>
-            <button onClick = {() => addCandidate(document.getElementById('Addcandidate').value)}>Add Candidate</button>
+            <div>
+            <button className='myButton' onClick = {() => addCandidate(document.getElementById('Addcandidate').value)}>Add Candidate</button>
             <button onClick = {() => getNoOfCandidates()}>Get No of Candidates</button>
-            <div>{noOfCandidates}</div>
+            <button onClick = {() => getCandidates()}>Get Candidates</button>
+            </div>
+            <div>{`Total number of candidates are ${noOfCandidates}`}</div>
+            <div>
+              Candidates are:
+            {candidates.map((candidate, index) => {
+              return <div key = {index}>{candidate}</div>
+            })}
+            </div>
             <input id = "Votecandidate" type = "text"></input>
-            <button onClick = {() => voteForCandidate(document.getElementById('Votecandidate').value)}>Vote for Candidate</button>
+            <div>
+            <button className='myButton' onClick = {() => voteForCandidate(document.getElementById('Votecandidate').value)}>Vote for Candidate</button>
             <button onClick = {() => getWinner()}>Get Winner</button>
+            <button onClick = {() => calculateWinner()}>Calculate Winner</button>
+            </div>
             <div>{winner}</div>
             <button onClick = {() => reset()}>Reset</button>
         </div>
